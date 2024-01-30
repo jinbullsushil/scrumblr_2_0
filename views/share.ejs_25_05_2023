@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <!-- Meta, title, CSS, favicons, etc. -->
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- STYLES -->
+  <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  
+	<!-- FONTS -->
+	<link rel="preconnect" href="https://fonts.gstatic.com">
+	<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Stencil+Display:wght@100&family=Covered+By+Your+Grace&family=Rock+Salt&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="/css/common.css">
+	<!-- SCRIPTS -->
+
+	<!-- jQuery -->
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+	<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
+
+	
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.1/socket.io.min.js"></script>	
+	
+	  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+	  <script src="/lib/common.js" ></script>
+	
+	<title><%=locals.pageTitle %></title>
+
+<style>
+	.nav-menu{
+		list-style-type:none;
+		padding:0px;
+		margin:0px;
+	}
+	.nav-menu li{
+		float:left;
+		padding-right: 30px;
+	}
+	.nav-menu li a{
+		font-size:17px;
+	}
+</style>
+
+<script language="JavaScript">
+    $(function () {
+        $("#btn_code_submit").click(function () {
+			if($('#sharecode').val()==""){
+				alert('Please enter the code.');
+				return false;
+			}
+            window.location.href="//<%=locals.baseurl %>/share/"+$('#sharecode').val();
+        });
+    });
+</script>
+</head>
+
+<body style="background:#31b03c !important;">
+
+
+<div class="navbar navbar-static-top public-header">
+    <div class="header navbar-inner">
+        <div class="container-fluid">    
+			<div class="row">    
+			<div class="col-sm-2">
+
+            <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </a>
+            <a href="https://dev.write.studio" class="brand"><img alt="Write" height="72" src="https://dev.write.studio/Images/icons/apple-touch-icon-144-precomposed.png?h=72&w=72" width="72"></a>
+			</div>
+            <div class="col-md-10">
+                <ul class="nav-menu" style="margin-top:20px;">
+                    <li><a href="https://write.studio" style="color:white;">Home</a></li>
+                    <li><a href="javascript:void(0);" class="active" style="color:black;"> Share code</a></li>
+                </ul>
+            </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="container">
+
+<div class="row-fluid border-box">
+    <div class="span12">
+        <div class="row-fluid text-center topPadding">
+            <img src="https://dev.write.studio//Images/icons/apple-touch-icon-144-precomposed.png" style="height:100px;">
+        </div>
+     
+        
+        <div class="form-container">
+            
+            <div class="email-login-container">
+                <div class="row-fluid">
+
+
+
+
+
+
+						<div class="row-fluid center">
+            <h5>
+                Please enter the share code
+            </h5>
+        </div>
+
+<% if(locals.errormessage){%>
+<div class="alert alert-danger" data-valmsg-summary="true"><a class="close" data-dismiss="alert">×</a><ul><li style="display:none1"><%=locals.errormessage %></li>
+</ul></div>
+<% } %>
+
+
+                       <div class="row-fluid">
+                            <div class="control-group"><div class="controls"><input type="text" autofocus="True" class="span6 input-large" id="sharecode" maxlength="100" name="sharecode" value="" autocomplete="off"></div></div>
+                        </div>
+                       
+                        
+                        <div class="row-fluid">
+                            <div class="control-group">
+                                <div class="controls">
+                                    <button class="btn btn-login btn-success" id="btn_code_submit" type="button">Submit</button>
+                                </div>
+                            </div>
+                        </div>
+                       
+ </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+
+    body {
+        background-color: #31b03c !important;
+    }
+
+    .border-box {
+        margin-bottom: 100px;
+        border: 8px solid;
+        border-color: #FFA500;
+        background: #fff;
+    }
+
+    .log-in-option {
+        width: 50%;
+    }
+
+    .form-container form {
+        width: 100%;
+    }
+
+    .email-login-container .controls.abc {
+        width: 100%;
+        padding: 0 38px 0 0;
+        text-align: right;
+    }
+
+    .control-group .log-in-option .checkbox {
+        width: 100%;
+        text-align: left;
+    }
+
+        .control-group .log-in-option .checkbox input {
+            height: auto;
+        }
+
+    .email-login-container {
+        width: 50%;
+        padding-left: 40px;
+    }
+
+    .third-party-login-container {
+        width: 50%;
+        padding-left: 60px;
+    }
+
+    .btn-primary {
+        padding: 15px 40px;
+        font-size: 20px;
+    }
+
+    .topPadding {
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+
+    .control-group {
+        margin: 8px 0;
+        display: flex;
+        align-items: center;
+    }
+
+        .control-group label {
+            width: 20%;
+            text-align: right;
+            margin: 0 30px 0px 0;
+        }
+
+        .control-group .controls {
+            width: 75%;
+        }
+
+            .control-group .controls .input-large {
+                margin-bottom: 0;
+                height: 45px;
+                width: 90% !important;
+            }
+
+    .login-form-input {
+        height: 45px !important;
+    }
+
+    .control-group.span6 {
+        display: flex;
+    }
+
+    .control-group .login-form-label {
+        margin: 0 30px 0px 0;
+    }
+
+    .optional-promotion .control-group {
+        margin: 0 auto;
+        width: 55%;
+    }
+
+        .optional-promotion .control-group label {
+            width: 22%;
+        }
+
+    .form-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 20px;
+        position: relative;
+    }
+
+</style>
+    </div>

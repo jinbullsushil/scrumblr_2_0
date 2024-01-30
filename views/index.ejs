@@ -1,0 +1,107 @@
+<%- include('layout') -%>
+<div class="container-fluid">    
+<div class="row">    
+	<div class="col-sm-12">
+<!--<header class="site-header">
+	<div class="site-header__wrapper">
+		<a class="greyheading" href="/">scrumblr</a>
+	</div>
+</header>-->
+</div>
+</div>
+</div>
+
+
+<div class="container-fluid">    
+<div class="row">    
+	<div class="col-sm-12">
+
+<div class="board-wrapper">
+
+	
+
+	  <div class="tab-content">
+    <div id="home" class="tab-pane fade in active">
+		
+		<div class="topflexcontainer" style="justify-content: space-between; align-items: baseline;">
+
+			<div class="row">
+					<div class="col-sm-12">
+							<h3 class="descriptionCeditable ui-editable" id="board-description">Board Description</h3>							
+					</div>
+					<div class="col-sm-12">
+							<h3 class="ceditable ui-editable" id="board-title">Board Title</h3>
+					</div>
+			</div>
+		</div>	
+	
+	
+	
+	  <div class="board-outline ui-resizable" style="clear:both;">
+		<div id="board">
+			<div id="board-doodles"></div>
+			<img id="marker" src="images/marker.png" class="ui-draggable ui-draggable-handle">
+			<img id="eraser" src="images/eraser.png" class="ui-draggable ui-draggable-handle">
+			<table class="board-table" id="board-table">
+				<tbody>
+					<tr>
+						<td id="icon-col" width="1%">
+							<svg class="col-icon" id="add-col" width="20" height="20">
+								<use xlink:href="teenyicons/teenyicons-outline-sprite.svg#outline--plus-circle"></use>
+							</svg>
+							<svg class="col-icon" id="delete-col" width="20" height="20">
+								<use xlink:href="teenyicons/teenyicons-outline-sprite.svg#outline--minus-circle"></use>
+							</svg>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+	<div class="buttons">
+		<svg class="bottom-icon" id="create-card" width="20" height="20">
+			<use xlink:href="teenyicons/teenyicons-outline-sprite.svg#outline--text-document"></use>
+		</svg>
+		<svg class="bottom-icon" id="create-sticky" width="20" height="20">
+			<use xlink:href="teenyicons/teenyicons-outline-sprite.svg#outline--note"></use>
+		</svg>
+	</div>
+	<div class="stickers">
+		<div class="sticker" id="sticker-red"></div>
+		<div class="sticker" id="sticker-blue"></div>
+		<div class="sticker" id="sticker-yellow"></div>
+		<div class="sticker" id="sticker-green"></div>
+		<br>
+		<div class="sticker" id="sticker-pink"></div>
+		<div class="sticker" id="sticker-lightblue"></div>
+		<div class="sticker" id="sticker-orange"></div>
+		<div class="sticker" id="sticker-purple"></div>	
+		<br>
+		<div class="sticker" id="nosticker"></div>	
+	</div>
+	<div class="names">
+		<p>connected:</p>	
+		<input id="yourname-input">
+		<span class="you-text">(you)</span><ul id="names-ul"></ul>
+	</div>	
+	  
+	  
+	  
+    </div>
+    <div id="menu1" class="tab-pane fade">
+      <h3>Notes</h3>
+    </div>
+    <div id="menu2" class="tab-pane fade">
+      <h3>Resources</h3>
+    </div>
+    
+  </div>
+	
+	
+	
+</div>	
+	
+</div>
+</div>
+</div>
+
