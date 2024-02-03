@@ -219,7 +219,7 @@ app.post('/setTabDataToDb', (req, res) => {
             throw new Error('Invalid request body');
         }
         db.setDbTabData(getPadID, postData);
-        console.log('Data stored in database:', postData);
+        //console.log('Data stored in database:', postData);
         res.status(200).send('Data stored in database');
     } catch (error) {
         console.error('Error:', error.message);
@@ -258,9 +258,12 @@ router.get('/pinboard/:id/:sectionname', async function (req, res) {
 			// Assign default value only if dbTabData is empty or undefined
 			const defaultTabData = [
 				[
-					{ enable: true, label: 'Notes','icon' :'' },
-					{ enable: true, label: 'Resources','icon' :'' },
-					{ enable: true, label: 'Tasks','icon' :'' }
+					{ enable: true, label: 'Notes', icon :'',tabindex:0 },
+					{ enable: true, label: 'Resources', icon :'',tabindex:1 },
+					{ enable: true, label: 'Tasks', icon :'',tabindex:2 },
+					{ enable: true, label: 'Q&A', icon :'',tabindex:3 },
+					{ enable: true, label: 'Subject', icon :'',tabindex:4 },
+					{ enable: true, label: 'Ideas',icon :'',tabindex:5 }
 				]
 			];
 			// Update dbTabData with the default value
@@ -278,9 +281,12 @@ router.get('/pinboard/:id/:sectionname', async function (req, res) {
 		}	
 		*/
 		var mainDefaultArr =[
-			{ tabname: 'notes', 'active' : false , icon: `<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xl="http://www.w3.org/1999/xlink" xmlns:dc="http://purl.org/dc/elements/1.1/" viewBox="-308 -223 30 30" width="30" height="30"><defs/><g id="Notes-Instruction" stroke="none" stroke-dasharray="none" fill="none" stroke-opacity="1" fill-opacity="1"><title>Notes-Instruction</title><rect fill="transparent" x="-308" y="-223" width="30" height="30"/><g id="Notes-Instruction_Layer_1"><title>Layer 1</title><g id="Graphic_24"><title>Assignment</title><path d="M -288.4889 -215.1 L -292.01867 -215.1 C -292.37333 -216.202 -293.30222 -217 -294.4 -217 C -295.49778 -217 -296.42667 -216.202 -296.78133 -215.1 L -300.3111 -215.1 C -301.24 -215.1 -302 -214.245 -302 -213.2 L -302 -199.9 C -302 -198.855 -301.24 -198 -300.3111 -198 L -288.4889 -198 C -287.56 -198 -286.8 -198.855 -286.8 -199.9 L -286.8 -213.2 C -286.8 -214.245 -287.56 -215.1 -288.4889 -215.1 Z M -294.4 -215.1 C -293.93556 -215.1 -293.55556 -214.6725 -293.55556 -214.15 C -293.55556 -213.6275 -293.93556 -213.2 -294.4 -213.2 C -294.86444 -213.2 -295.24444 -213.6275 -295.24444 -214.15 C -295.24444 -214.6725 -294.86444 -215.1 -294.4 -215.1 Z M -292.7111 -201.8 L -298.62222 -201.8 L -298.62222 -203.7 L -292.7111 -203.7 L -292.7111 -201.8 Z M -290.17778 -205.6 L -298.62222 -205.6 L -298.62222 -207.5 L -290.17778 -207.5 L -290.17778 -205.6 Z M -290.17778 -209.4 L -298.62222 -209.4 L -298.62222 -211.3 L -290.17778 -211.3 L -290.17778 -209.4 Z" fill="black"/></g></g></g></svg>` },
-			{ tabname: 'research','active' : false , icon: `<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xl="http://www.w3.org/1999/xlink" xmlns:dc="http://purl.org/dc/elements/1.1/" viewBox="-308 -223 30 30" width="30" height="30"><defs/><g id="Notes-Research" stroke="none" stroke-dasharray="none" fill="none" stroke-opacity="1" fill-opacity="1"><title>Notes-Research</title><rect fill="transparent" x="-308" y="-223" width="30" height="30"/><g id="Notes-Research_Layer_1"><title>Layer 1</title><g id="Graphic_2"><title>Turned In</title><path d="M -287.57143 -217.5 L -298.42857 -217.5 C -299.62286 -217.5 -300.58914 -216.55 -300.58914 -215.3889 L -300.6 -198.5 L -293 -201.66667 L -285.4 -198.5 L -285.4 -215.3889 C -285.4 -216.55 -286.37714 -217.5 -287.57143 -217.5 Z" fill="black"/></g></g></g></svg>`},
-			{ tabname: 'tasks','active' : true, icon: `<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xl="http://www.w3.org/1999/xlink" xmlns:dc="http://purl.org/dc/elements/1.1/" viewBox="-308 -223 30 30" width="30" height="30"><defs/><g id="Tasks-Done" stroke="none" stroke-dasharray="none" fill="none" stroke-opacity="1" fill-opacity="1"><title>Tasks-Done</title><rect fill="transparent" x="-308" y="-223" width="30" height="30"/><g id="Tasks-Done_Layer_1"><title>Layer 1</title><g id="Graphic_27"><title>Assignment Turned In</title><path d="M -286.66553 -215.6 L -290.1953 -215.6 C -290.54998 -216.702 -291.47886 -217.5 -292.57664 -217.5 C -293.67442 -217.5 -294.6033 -216.702 -294.95798 -215.6 L -298.48775 -215.6 C -299.41664 -215.6 -300.17664 -214.745 -300.17664 -213.7 L -300.17664 -200.4 C -300.17664 -199.355 -299.41664 -198.5 -298.48775 -198.5 L -286.66553 -198.5 C -285.73664 -198.5 -284.97664 -199.355 -284.97664 -200.4 L -284.97664 -213.7 C -284.97664 -214.745 -285.73664 -215.6 -286.66553 -215.6 Z M -292.57664 -215.6 C -292.1122 -215.6 -291.7322 -215.1725 -291.7322 -214.65 C -291.7322 -214.1275 -292.1122 -213.7 -292.57664 -213.7 C -293.0411 -213.7 -293.4211 -214.1275 -293.4211 -214.65 C -293.4211 -215.1725 -293.0411 -215.6 -292.57664 -215.6 Z M -294.26553 -202.3 L -297.6433 -206.1 L -296.45264 -207.4395 L -294.26553 -204.9885 L -288.70064 -211.249 L -287.50998 -209.9 L -294.26553 -202.3 Z" fill="black"/></g></g></g></svg>` },
+			{ tabname: 'notes', 'active' : false , icon: `<svg xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:xl="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-5 -25 22 27" width="22" height="27"><defs/><g id="Pinboard-note" stroke-opacity="1" stroke="none" fill="none" fill-opacity="1" stroke-dasharray="none"><title>Pinboard-note</title><g id="Pinboard-note_Layer_1"><title></title><g id="Graphic_19"><text transform="translate(-4.5 -24.5)" fill="black"><tspan font-family="Apple Color Emoji" font-size="16" fill="black" x="0" y="20">📝</tspan></text></g></g></g></svg>` },
+			{ tabname: 'research','active' : false , icon: `<svg xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:xl="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-22 -1 21 26" width="21" height="26"><defs/><g id="Pinboard-resources" stroke-opacity="1" stroke="none" fill="none" fill-opacity="1" stroke-dasharray="none"><title>Pinboard-resources</title><g id="Pinboard-resources_Layer_1"><title></title><g id="Graphic_15"><text transform="translate(-22 -1)" fill="black"><tspan font-family="Apple Color Emoji" font-size="16" fill="black" x="0" y="20">⚛️</tspan></text></g></g></g></svg>`},
+			{ tabname: 'tasks','active' : true, icon: `<svg xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:xl="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-8 -10 23 26" width="23" height="26"><defs/><g id="Pinboard-tasks" stroke-opacity="1" stroke="none" fill="none" fill-opacity="1" stroke-dasharray="none"><title>Pinboard-tasks</title><g id="Pinboard-tasks_Layer_1"><title></title><g id="Graphic_15"><text transform="translate(-8 -10)" fill="black"><tspan font-family="Apple Color Emoji" font-size="16" fill="black" x="0" y="20">✅</tspan></text></g></g></g></svg>` },
+			{ tabname: 'questionanswer','active' : true, icon: `<svg xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:xl="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-18 -4 23 26" width="23" height="26"><defs/><g id="Pinboard-QandA" stroke-opacity="1" stroke="none" fill="none" fill-opacity="1" stroke-dasharray="none"><title>Pinboard-QandA</title><g id="Pinboard-QandA_Layer_1"><title></title><g id="Graphic_15"><text transform="translate(-18 -4)" fill="black"><tspan font-family="Apple Color Emoji" font-size="16" fill="black" x="0" y="20">✴️</tspan></text></g></g></g></svg>` },
+			{ tabname: 'subject','active' : true, icon: `<svg xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:xl="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-18 2 21 26" width="21" height="26"><defs/><g id="Pinboard-subject" stroke-opacity="1" stroke="none" fill="none" fill-opacity="1" stroke-dasharray="none"><title>Pinboard-subject</title><g id="Pinboard-subject_Layer_1"><title></title><g id="Graphic_16"><text transform="translate(-18 2)" fill="black"><tspan font-family="Apple Color Emoji" font-size="16" fill="black" x="0" y="20">🛄</tspan></text></g></g></g></svg>` },
+			{ tabname: 'ideas','active' : true, icon: `<svg xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:xl="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-24 -35 22 27" width="22" height="27"><defs/><g id="Pinboard-ideas" stroke-opacity="1" stroke="none" fill="none" fill-opacity="1" stroke-dasharray="none"><title>Pinboard-ideas</title><g id="Pinboard-ideas_Layer_1"><title></title><g id="Graphic_16"><text transform="translate(-23.097656 -34.539062)" fill="black"><tspan font-family="Apple Color Emoji" font-size="16" fill="black" x="0" y="20">💡</tspan></text></g></g></g></svg>` },
 		]
 		/*
 		 dbTabData = [
@@ -292,7 +298,7 @@ router.get('/pinboard/:id/:sectionname', async function (req, res) {
 		  ];
 		 */ 
 
-		console.log(mainDefaultArr);
+		//console.log(mainDefaultArr);
 		//console.log('size2size2size2', size2);
 		//console.log('size2size2size2', size);
 
@@ -316,7 +322,7 @@ router.get('/pinboard/:id/:sectionname', async function (req, res) {
 
 router.get('/pinboard2/:id/:sectionname', function(req, res){
 	var uniqueID = Math.round(Math.random() * 99999999); //is this big enough to assure
-	console.log('uniqueIDuniqueID',uniqueID);
+	//console.log('uniqueIDuniqueID',uniqueID);
 	var url = req.header('host') + req.baseUrl;
 	res.cookie(`scrumscrum-username`,req.query.name,365);	
 	//console.log('------------------------------- page = ',req.query.name);

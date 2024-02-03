@@ -89,61 +89,74 @@ function copyToClipboard(elementId) {
 
 }
 
+function storeDataToDatabase(){
+	var dataArr =[];
+	$('.chkbox_select').each(function(e,index,html) {
+		var row = $(this).closest("tr");
+		var objData = {};
+		//var selectBox  = $('#enable_'+e).prop("checked");
+		//var textBox    = $('#label_'+e).val();
+		var selectBox  = row.find("input[type='checkbox']").prop("checked");
+		var textBox    = row.find(".clsLable").val();
+		var tabIndex    = row.find(".clsTabIndex").val();
+		//console.log('textBoxtextBoxtextBox', textBox);
+		objData.enable = selectBox;
+		objData.label  = textBox;
+		objData.tabname = '';
+		objData.icon   = '';
+		objData.tabindex   = tabIndex;
+		//console.log('e', e);
+		//console.log('index', index);
+		dataArr.push(objData);
+	});
+	var postData = JSON.stringify(dataArr);			
+	var getPadID = "<%=locals.boardId %>_pinboard_tab";
+
+	fetch('/setTabDataToDb', {
+		method: 'POST',
+		headers: {
+		'Content-Type': 'application/json', // Change content type to JSON
+		},
+		body: JSON.stringify({ postData, getPadID }), // Use JSON.stringify for the body
+	})
+	.then(response => {
+	  if (!response.ok) {
+		throw new Error(`HTTP error! Status: ${response.status}`);
+	  }
+	  return response.text();
+	})
+	.then(data => console.log(data))
+	.catch(error => console.error('Fetch error:', error));
+}
+
   $(document).ready(function(){
+		var checkAnyChangeOnPage = false;
 		$('#custome_tabs li:not(.hidediv):first a').tab('show');    
-		/*
+		
 		$(document).on("click",".arrow_up",function() {    		
-		  var index = $(this).data("index");		  
-		  if (index > 0) {
-			$(this).parents("tr").insertBefore($(this).parents("tr").prev())
+		  checkAnyChangeOnPage = true;	
+		  var row = $(this).closest("tr");		  		  
+		  if (row.prev().length !== 0) {
+			row.insertBefore(row.prev())
+			storeDataToDatabase();
 		  }
 		});
 		$(document).on("click",".arrow_down",function() {    				
-			  var index = $(this).data("index");			  
-			  var rowCount = $("tbody tr").length;
-			  if (index < rowCount - 1) {
-				$(this).parents("tr").insertAfter($(this).parents("tr").next());
+			  checkAnyChangeOnPage = true;
+			  var row = $(this).closest("tr");
+			  if (row.next().length !== 0) {
+				//$(this).parents("tr").insertAfter($(this).parents("tr").next());
+				row.insertAfter(row.next())
+				storeDataToDatabase();
 			  }
 		});
-		*/		
+				
 		$(document).on("change keyup","input[type='checkbox'], input[type='text'] ",function() {
 			var checkboxLength = $('.chkbox_select').length;
-			console.log(checkboxLength);
-			var dataArr =[];
-			$('.chkbox_select').each(function(e,index,html) {
-				var row = $(this).closest("tr");
-				var objData = {};
-				//var selectBox  = $('#enable_'+e).prop("checked");
-				//var textBox    = $('#label_'+e).val();
-				var selectBox  = row.find("input[type='checkbox']").prop("checked");
-				var textBox    = row.find(".clsLable").val();
-				console.log('textBoxtextBoxtextBox', textBox);
-				objData.enable = selectBox;
-				objData.label  = textBox;
-				objData.tabname = '';
-				objData.icon   = '';
-				//console.log('e', e);
-				//console.log('index', index);
-				dataArr.push(objData);
-			});
-			var postData = JSON.stringify(dataArr);			
-			var getPadID = "<%=locals.boardId %>_pinboard_tab";
-      
-			fetch('/setTabDataToDb', {
-				method: 'POST',
-				headers: {
-				'Content-Type': 'application/json', // Change content type to JSON
-				},
-				body: JSON.stringify({ postData, getPadID }), // Use JSON.stringify for the body
-			})
-			.then(response => {
-			  if (!response.ok) {
-				throw new Error(`HTTP error! Status: ${response.status}`);
-			  }
-			  return response.text();
-			})
-			.then(data => console.log(data))
-			.catch(error => console.error('Fetch error:', error));
+			checkAnyChangeOnPage = true;
+			//console.log(checkboxLength);
+			storeDataToDatabase();
+			
 		});
   
 		$(document).on("click","#share_clicks",function() {    
@@ -165,6 +178,7 @@ function copyToClipboard(elementId) {
 		});
 
 		$(document).on("click","#edit_tab_clicks",function() {
+		  checkAnyChangeOnPage = false;
 		  var getPadID = "<%=locals.boardId %>";
 		  //alert(getPadID);
 		  var baseurl = location.pathname.substring(0, location.pathname.lastIndexOf('/'));		  
@@ -177,7 +191,9 @@ function copyToClipboard(elementId) {
 			// Optionally, you can handle the close button click separately
 			$('#myEditTabModal .close').on('click', function () {
 				$('#myEditTabModal').modal('hide');
-				location.reload(); // Reload the page
+				if(checkAnyChangeOnPage){
+					location.reload(); // Reload the page
+				}
 			});
 		});		
 	});			
@@ -214,7 +230,7 @@ function copyToClipboard(elementId) {
   <g id="Share_modal" stroke-dasharray="none" fill="none" stroke="none" fill-opacity="1" stroke-opacity="1">
     <title>Share modal</title>
     <g id="Share_modal_Layer_1">
-      <title>Layer 1</title>
+      <title></title>
       <g id="Graphic_133">
         <title>Share </title>
         <path d="M -293 -217.5 L -300.77273 -214.04545 L -300.77273 -208.86364 C -300.77273 -204.07045 -297.45636 -199.58818 -293 -198.5 C -288.54364 -199.58818 -285.22727 -204.07045 -285.22727 -208.86364 L -285.22727 -214.04545 L -293 -217.5 Z M -294.72727 -203.68182 L -298.18182 -207.13636 L -296.9641 -208.3541 L -294.72727 -206.1259 L -289.0359 -211.81727 L -287.81818 -210.5909 L -294.72727 -203.68182 Z" fill="black"/>
@@ -236,7 +252,7 @@ function copyToClipboard(elementId) {
     <% for(var k=0; k < locals.tabData[0].length; k++) { %>
       <% var tabDataItem = locals.tabData[0][k] || {}; %>
 
-      <% var mainDataItem = locals.mainFullData[k] || {}; %>
+      <% var mainDataItem = locals.mainFullData[tabDataItem.tabindex] || {}; %>
       <li class="<%= tabDataItem.enable ? 'enabled' : 'hidediv' %>"><a data-toggle="tab" href="#<%=mainDataItem.tabname %>"><%- mainDataItem.icon %> <%=tabDataItem.label%></a></li>
       
     <% } %>
@@ -268,40 +284,17 @@ function copyToClipboard(elementId) {
       <% for(var k=0; k < locals.tabData[0].length; k++) { %>
         <% var tabDataItem = locals.tabData[0][k] || {}; %>
   
-        <% var mainDataItem = locals.mainFullData[k] || {}; %>
+        <% var mainDataItem = locals.mainFullData[tabDataItem.tabindex] || {}; %>
 
         <div id="<%=mainDataItem.tabname %>" class="tab-pane fade <%= tabDataItem.enable ? 'enabled' : 'hidediv' %>">
+			<% if (tabDataItem.enable) { %> 		
           <div class="h_iframe">
             <iframe  src="//<%=locals.baseurl %>/<%=locals.boardId %>_<%=mainDataItem.tabname %>" class="iframe fop" frameborder="0"></iframe>
           </div>
+		   <% } %>
         </div>
-      <% } %>
-  
+      <% } %>  
 
-
-<!--
-    <div id="tasks" class="tab-pane fade in active">
-			<div class="h_iframe">
-        <iframe  src="//<%=locals.baseurl %>/<%=locals.boardId %>_tasks" class="iframe fop" frameborder="0"></iframe>
-      </div>
-	  </div>
-
-    <div id="notes" class="tab-pane fade">
-      
-      <div class="h_iframe">
-        <iframe  src="//<%=locals.baseurl %>/<%=locals.boardId %>_notes" class="iframe fop" frameborder="0"></iframe>
-      </div>
-    
-
-
-    </div>
-    <div id="research" class="tab-pane fade">
-      <div class="h_iframe">
-        <iframe  src="//<%=locals.baseurl %>/<%=locals.boardId %>_research" class="iframe fop" frameborder="0"></iframe>
-      </div>
-    
-    </div>
-  -->    
   </div>
 	
 	
@@ -328,7 +321,7 @@ function copyToClipboard(elementId) {
   <g id="Share_modal" stroke-dasharray="none" fill="none" stroke="none" fill-opacity="1" stroke-opacity="1">
     <title>Share modal</title>
     <g id="Share_modal_Layer_1">
-      <title>Layer 1</title>
+      <title></title>
       <g id="Graphic_133">
         <title>Share </title>
         <path d="M -293 -217.5 L -300.77273 -214.04545 L -300.77273 -208.86364 C -300.77273 -204.07045 -297.45636 -199.58818 -293 -198.5 C -288.54364 -199.58818 -285.22727 -204.07045 -285.22727 -208.86364 L -285.22727 -214.04545 L -293 -217.5 Z M -294.72727 -203.68182 L -298.18182 -207.13636 L -296.9641 -208.3541 L -294.72727 -206.1259 L -289.0359 -211.81727 L -287.81818 -210.5909 L -294.72727 -203.68182 Z" fill="black"/>
@@ -407,13 +400,13 @@ function copyToClipboard(elementId) {
 				</tr>
 			  </thead>
 			  <tbody>
-				  <% for(var i=0; i < 3; i++) { %>
-					<% var mainDataItem = locals.mainFullData[i] || {}; %>
+				  <% for(var i=0; i < 6; i++) { %>					
 				  <% if (locals.tabData && locals.tabData.length > 0) { %>
 					<% var tabDataItem = locals.tabData[0][i] || {}; %>
 				  <% } else{ %>
 					<% var tabDataItem = {}; %>
 				  <% } %>
+				  <% var mainDataItem = locals.mainFullData[tabDataItem.tabindex] || {}; %>
 				<tr id="row_<%= i %>">
 				  <th scope="row" class="text-center"><input type="checkbox" id="enable_<%= i %>" class="chkbox_select" <%= tabDataItem.enable ? 'checked' : '' %>></th>
 				  <td>
@@ -428,7 +421,7 @@ function copyToClipboard(elementId) {
 					  </svg>
 					</a>
 				  </td>
-				  <td><input type="text" id="label_<%= i %>" class="clsLable form-control" value="<%= tabDataItem.label || 'Notes' %>" autocomplete="off" ></td>
+				  <td><input type="hidden" id="tabindex_<%= i %>" class="clsTabIndex" value="<%= tabDataItem.tabindex || i %>"><input type="text" id="label_<%= i %>" class="clsLable form-control" placeholder="Tab name" value="<%= tabDataItem.label || '' %>" autocomplete="off" ></td>
 				  <td><%- mainDataItem.icon %></td>
 				  <td>&nbsp;</td>
 				  <td>&nbsp;</td>
