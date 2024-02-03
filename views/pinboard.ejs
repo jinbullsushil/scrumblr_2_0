@@ -251,8 +251,9 @@ function storeDataToDatabase(){
 
     <% for(var k=0; k < locals.tabData[0].length; k++) { %>
       <% var tabDataItem = locals.tabData[0][k] || {}; %>
-
-      <% var mainDataItem = locals.mainFullData[tabDataItem.tabindex] || {}; %>
+      <% var dbTabIndex = tabDataItem.tabindex || k; %>
+			
+      <% var mainDataItem = locals.mainFullData[dbTabIndex] || {}; %>
       <li class="<%= tabDataItem.enable ? 'enabled' : 'hidediv' %>"><a data-toggle="tab" href="#<%=mainDataItem.tabname %>"><%- mainDataItem.icon %> <%=tabDataItem.label%></a></li>
       
     <% } %>
@@ -281,10 +282,11 @@ function storeDataToDatabase(){
 	  <div class="tab-content">
 
 
+
       <% for(var k=0; k < locals.tabData[0].length; k++) { %>
         <% var tabDataItem = locals.tabData[0][k] || {}; %>
-  
-        <% var mainDataItem = locals.mainFullData[tabDataItem.tabindex] || {}; %>
+		<% var dbTabIndex = tabDataItem.tabindex || k; %>
+        <% var mainDataItem = locals.mainFullData[dbTabIndex] || {}; %>
 
         <div id="<%=mainDataItem.tabname %>" class="tab-pane fade <%= tabDataItem.enable ? 'enabled' : 'hidediv' %>">
 			<% if (tabDataItem.enable) { %> 		
@@ -406,7 +408,8 @@ function storeDataToDatabase(){
 				  <% } else{ %>
 					<% var tabDataItem = {}; %>
 				  <% } %>
-				  <% var mainDataItem = locals.mainFullData[tabDataItem.tabindex] || {}; %>
+				  <% var dbTabIndex = tabDataItem.tabindex || i; %>
+				  <% var mainDataItem = locals.mainFullData[dbTabIndex] || {}; %>
 				<tr id="row_<%= i %>">
 				  <th scope="row" class="text-center"><input type="checkbox" id="enable_<%= i %>" class="chkbox_select" <%= tabDataItem.enable ? 'checked' : '' %>></th>
 				  <td>
