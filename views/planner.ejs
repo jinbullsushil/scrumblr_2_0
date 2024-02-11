@@ -39,6 +39,17 @@
 
 </style>
 
+<style>
+    .arrow {
+      cursor: pointer!important;
+    }
+    .hidediv{
+      display: none!important;
+    }	
+	#custome_tabs li svg {    
+		margin-top: -3px!important;   
+	}
+  </style>
 
 
 <script>
@@ -81,29 +92,113 @@ function copyToClipboard(elementId) {
 
 }
 
+function storeDataToDatabase(){
+	var dataArr =[];
+	$('.chkbox_select').each(function(e,index,html) {
+		var row = $(this).closest("tr");
+		var objData = {};
+		//var selectBox  = $('#enable_'+e).prop("checked");
+		//var textBox    = $('#label_'+e).val();
+		var selectBox  = row.find("input[type='checkbox']").prop("checked");
+		var textBox    = row.find(".clsLable").val();
+		var tabIndex    = row.find(".clsTabIndex").val();
+		//console.log('textBoxtextBoxtextBox', textBox);
+		objData.enable = selectBox;
+		objData.label  = textBox;
+		objData.tabname = '';
+		objData.icon   = '';
+		objData.tabindex   = tabIndex;
+		//console.log('e', e);
+		//console.log('index', index);
+		dataArr.push(objData);
+	});
+	var postData = JSON.stringify(dataArr);			
+	var getPadID = "<%=locals.boardId %>_planner_tab";
+
+	fetch('/setTabDataToDb', {
+		method: 'POST',
+		headers: {
+		'Content-Type': 'application/json', // Change content type to JSON
+		},
+		body: JSON.stringify({ postData, getPadID }), // Use JSON.stringify for the body
+	})
+	.then(response => {
+	  if (!response.ok) {
+		throw new Error(`HTTP error! Status: ${response.status}`);
+	  }
+	  return response.text();
+	})
+	.then(data => console.log(data))
+	.catch(error => console.error('Fetch error:', error));
+}
 
   $(document).ready(function(){
+		var checkAnyChangeOnPage = false;
+		$('#custome_tabs li:not(.hidediv):first a').tab('show');    
+		
+		$(document).on("click",".arrow_up",function() {    		
+		  checkAnyChangeOnPage = true;	
+		  var row = $(this).closest("tr");		  		  
+		  if (row.prev().length !== 0) {
+			row.insertBefore(row.prev())
+			storeDataToDatabase();
+		  }
+		});
+		$(document).on("click",".arrow_down",function() {    				
+			  checkAnyChangeOnPage = true;
+			  var row = $(this).closest("tr");
+			  if (row.next().length !== 0) {
+				//$(this).parents("tr").insertAfter($(this).parents("tr").next());
+				row.insertAfter(row.next())
+				storeDataToDatabase();
+			  }
+		});
+				
+		$(document).on("change keyup","input[type='checkbox'], input[type='text'] ",function() {
+			var checkboxLength = $('.chkbox_select').length;
+			checkAnyChangeOnPage = true;
+			//console.log(checkboxLength);
+			storeDataToDatabase();
+			
+		});
+  
+		$(document).on("click","#share_clicks",function() {    
+		  var getPadID = "<%=locals.boardId %>";
+		  var baseurl = location.pathname.substring(0, location.pathname.lastIndexOf('/'));
+		  var shareUniqueID = Math.round(Math.random() * 9999999); //is this big enough to assure 
+		  
+		  var action = "setShareCode";
+		  var data = {
+			  item: 'planner',
+			  sharecode: shareUniqueID,
+			  padId: getPadID
+		  };
+		  if (1){
+			  sendAction(action, data);
+		  }		  
+		  $('#txtCopyCode').val(shareUniqueID);
+		  $('#myShareModal').modal('show');
+		});
 
-
-  $(document).on("click","#share_clicks",function() {    
-
-      var getPadID = "<%=locals.boardId %>";
-      var baseurl = location.pathname.substring(0, location.pathname.lastIndexOf('/'));
-      var shareUniqueID = Math.round(Math.random() * 9999999); //is this big enough to assure 
-      
-      var action = "setShareCode";
-      var data = {
-          item: 'planner',
-          sharecode: shareUniqueID,
-          padId: getPadID
-      };
-      if (1){
-          sendAction(action, data);
-      }
-      
-      $('#txtCopyCode').val(shareUniqueID);
-      $('#myShareModal').modal('show');
-    });
+		$(document).on("click","#edit_tab_clicks",function() {
+		  checkAnyChangeOnPage = false;
+		  var getPadID = "<%=locals.boardId %>";
+		  //alert(getPadID);
+		  var baseurl = location.pathname.substring(0, location.pathname.lastIndexOf('/'));		  
+		  //$('#myEditTabModal').modal('show');
+			$('#myEditTabModal').modal({
+				show: true,
+				backdrop: 'static', // Prevents closing on click outside
+				keyboard: false // Prevents closing on escape key press
+			});
+			// Optionally, you can handle the close button click separately
+			$('#myEditTabModal .close').on('click', function () {
+				$('#myEditTabModal').modal('hide');
+				if(checkAnyChangeOnPage){
+					location.reload(); // Reload the page
+				}
+			});
+		});		
 	});			
 </script>
 </head>
@@ -138,7 +233,7 @@ function copyToClipboard(elementId) {
   <g id="Share_modal" stroke-dasharray="none" fill="none" stroke="none" fill-opacity="1" stroke-opacity="1">
     <title>Share modal</title>
     <g id="Share_modal_Layer_1">
-      <title>Layer 1</title>
+      <title></title>
       <g id="Graphic_133">
         <title>Share </title>
         <path d="M -293 -217.5 L -300.77273 -214.04545 L -300.77273 -208.86364 C -300.77273 -204.07045 -297.45636 -199.58818 -293 -198.5 C -288.54364 -199.58818 -285.22727 -204.07045 -285.22727 -208.86364 L -285.22727 -214.04545 L -293 -217.5 Z M -294.72727 -203.68182 L -298.18182 -207.13636 L -296.9641 -208.3541 L -294.72727 -206.1259 L -289.0359 -211.81727 L -287.81818 -210.5909 L -294.72727 -203.68182 Z" fill="black"/>
@@ -156,208 +251,55 @@ function copyToClipboard(elementId) {
         <div class="col-sm-8">
 	
 	<ul class="nav nav-tabs" id="custome_tabs">
-	
-		<li class="active"><a data-toggle="tab" href="#introduction">
-    	
-    	<svg xmlns:xl="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" xmlns:dc="http://purl.org/dc/elements/1.1/" version="1.1" viewBox="-308 -223 30 30" width="30" height="30">
-  <defs/>
-  <g id="Book-green" stroke="none" stroke-dasharray="none" fill="none" stroke-opacity="1" fill-opacity="1">
-    <title>Book-green</title>
-    <rect x="-308" y="-223" width="30" height="30"/>
-    <g id="Book-green_Layer_1">
-      <title>Layer 1</title>
-      <g id="Group_16">
-        <g id="Graphic_10">
-          <path d="M -283.59376 -206.67132 L -281.01564 -204.12757 L -292.4625 -198.66195 C -292.4625 -198.66195 -293.975 -197.97445 -294.6969 -199.07445 C -297.51564 -203.47445 -283.59376 -206.67132 -283.59376 -206.67132 Z" fill="#228b22"/>
-        </g>
-        <g id="Graphic_11">
-          <path d="M -292.7375 -201.85882 C -292.7375 -201.85882 -294.9375 -201.10257 -294.525 -199.62445 C -294.1125 -198.11195 -292.3594 -199.04007 -292.3594 -199.04007 L -281.4969 -204.0932 C -281.4969 -204.0932 -282.11564 -205.70882 -281.01564 -206.77445 Z" fill="#d9e3e8"/>
-        </g>
-        <g id="Graphic_12">
-          <path d="M -290.91564 -217.0182 L -280.5 -206.87757 L -292.80626 -202.06507 L -300.7125 -214.37132 Z" fill="#46b850"/>
-        </g>
-        <g id="Graphic_13">
-          <path d="M -290.60626 -214.71507 L -288.6125 -212.58382 L -296.0719 -209.90257 L -297.825 -212.6182 Z" fill="white"/>
-        </g>
-        <g id="Graphic_14">
-          <path d="M -281.53126 -205.67445 L -288.7844 -202.7182 L -281.6344 -205.98382 Z M -281.6344 -204.7807 L -289.36876 -201.58382 L -281.7719 -205.12445 Z M -281.56564 -204.29945 L -291.43126 -200.03695 L -281.70314 -204.60882 Z" fill="#94989b"/>
-        </g>
-        <g id="Graphic_15">
-          <path d="M -294.6969 -199.07445 C -295.9 -201.58382 -292.80626 -202.0307 -292.80626 -202.0307 L -300.7125 -214.37132 C -300.7125 -214.37132 -302.5 -214.4057 -302.5 -212.54945 C -302.5 -211.7932 -302.15626 -211.20882 -302.15626 -211.20882 Z" fill="#228b22"/>
-        </g>
-      </g>
-    </g>
-  </g>
-</svg> Introduction</a>
-</li>
-	
 
-		
-		
-		<li><a data-toggle="tab" href="#keypoints">
-<svg xmlns:xl="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" xmlns:dc="http://purl.org/dc/elements/1.1/" version="1.1" viewBox="-308 -223 30 30" width="30" height="30">
-  <defs/>
-  <g id="Book-blue" stroke="none" stroke-dasharray="none" fill="none" stroke-opacity="1" fill-opacity="1">
-    <title>Book-blue</title>
-    <rect x="-308" y="-223" width="30" height="30"/>
-    <g id="Book-blue_Layer_1">
-      <title>Layer 1</title>
-      <g id="Group_16">
-        <g id="Graphic_10">
-          <path d="M -283.59376 -206.67132 L -281.01564 -204.12757 L -292.4625 -198.66195 C -292.4625 -198.66195 -293.975 -197.97445 -294.6969 -199.07445 C -297.51564 -203.47445 -283.59376 -206.67132 -283.59376 -206.67132 Z" fill="#2a8fd8" fill-opacity=".97"/>
-        </g>
-        <g id="Graphic_11">
-          <path d="M -292.7375 -201.85882 C -292.7375 -201.85882 -294.9375 -201.10257 -294.525 -199.62445 C -294.1125 -198.11195 -292.3594 -199.04007 -292.3594 -199.04007 L -281.4969 -204.0932 C -281.4969 -204.0932 -282.11564 -205.70882 -281.01564 -206.77445 Z" fill="#d9e3e8"/>
-        </g>
-        <g id="Graphic_12">
-          <path d="M -290.91564 -217.0182 L -280.5 -206.87757 L -292.80626 -202.06507 L -300.7125 -214.37132 Z" fill="#55bfff"/>
-        </g>
-        <g id="Graphic_13">
-          <path d="M -290.60626 -214.71507 L -288.6125 -212.58382 L -296.0719 -209.90257 L -297.825 -212.6182 Z" fill="white"/>
-        </g>
-        <g id="Graphic_14">
-          <path d="M -281.53126 -205.67445 L -288.7844 -202.7182 L -281.6344 -205.98382 Z M -281.6344 -204.7807 L -289.36876 -201.58382 L -281.7719 -205.12445 Z M -281.56564 -204.29945 L -291.43126 -200.03695 L -281.70314 -204.60882 Z" fill="#94989b"/>
-        </g>
-        <g id="Graphic_15">
-          <path d="M -294.6969 -199.07445 C -295.9 -201.58382 -292.80626 -202.0307 -292.80626 -202.0307 L -300.7125 -214.37132 C -300.7125 -214.37132 -302.5 -214.4057 -302.5 -212.54945 C -302.5 -211.7932 -302.15626 -211.20882 -302.15626 -211.20882 Z" fill="#47a2f1"/>
-        </g>
-      </g>
-    </g>
-  </g>
-</svg>
-
-		Key Points</a></li>
-		
-    <li><a data-toggle="tab" href="#paragraph">
-        <svg xmlns:xl="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" xmlns:dc="http://purl.org/dc/elements/1.1/" version="1.1" viewBox="-308 -223 30 30" width="30" height="30">
-  <defs/>
-  <g id="Book-orange" stroke="none" stroke-dasharray="none" fill="none" stroke-opacity="1" fill-opacity="1">
-    <title>Book-orange</title>
-    <rect x="-308" y="-223" width="30" height="30"/>
-    <g id="Book-orange_Layer_1">
-      <title>Layer 1</title>
-      <g id="Group_16">
-        <g id="Graphic_10">
-          <path d="M -283.59376 -206.67132 L -281.01564 -204.12757 L -292.4625 -198.66195 C -292.4625 -198.66195 -293.975 -197.97445 -294.6969 -199.07445 C -297.51564 -203.47445 -283.59376 -206.67132 -283.59376 -206.67132 Z" fill="#e76d23"/>
-        </g>
-        <g id="Graphic_11">
-          <path d="M -292.7375 -201.85882 C -292.7375 -201.85882 -294.9375 -201.10257 -294.525 -199.62445 C -294.1125 -198.11195 -292.3594 -199.04007 -292.3594 -199.04007 L -281.4969 -204.0932 C -281.4969 -204.0932 -282.11564 -205.70882 -281.01564 -206.77445 Z" fill="#d9e3e8"/>
-        </g>
-        <g id="Graphic_12">
-          <path d="M -290.91564 -217.0182 L -280.5 -206.87757 L -292.80626 -202.06507 L -300.7125 -214.37132 Z" fill="#ffa500"/>
-        </g>
-        <g id="Graphic_13">
-          <path d="M -290.60626 -214.71507 L -288.6125 -212.58382 L -296.0719 -209.90257 L -297.825 -212.6182 Z" fill="white"/>
-        </g>
-        <g id="Graphic_14">
-          <path d="M -281.53126 -205.67445 L -288.7844 -202.7182 L -281.6344 -205.98382 Z M -281.6344 -204.7807 L -289.36876 -201.58382 L -281.7719 -205.12445 Z M -281.56564 -204.29945 L -291.43126 -200.03695 L -281.70314 -204.60882 Z" fill="#94989b"/>
-        </g>
-        <g id="Graphic_15">
-          <path d="M -294.6969 -199.07445 C -295.9 -201.58382 -292.80626 -202.0307 -292.80626 -202.0307 L -300.7125 -214.37132 C -300.7125 -214.37132 -302.5 -214.4057 -302.5 -212.54945 C -302.5 -211.7932 -302.15626 -211.20882 -302.15626 -211.20882 Z" fill="#e76d23"/>
-        </g>
-      </g>
-    </g>
-  </g>
-</svg>
-    Paragraph</a>
-
-    </li>
-	
-	<li><a data-toggle="tab" href="#summary">
-        
-		<svg xmlns:xl="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" xmlns:dc="http://purl.org/dc/elements/1.1/" version="1.1" viewBox="-308 -223 30 30" width="30" height="30">
-  <defs/>
-  <g id="Book-red" stroke="none" stroke-dasharray="none" fill="none" stroke-opacity="1" fill-opacity="1">
-    <title>Book-red</title>
-    <rect x="-308" y="-223" width="30" height="30"/>
-    <g id="Book-red_Layer_1">
-      <title>Layer 1</title>
-      <g id="Group_16">
-        <g id="Graphic_10">
-          <path d="M -283.59376 -206.67132 L -281.01564 -204.12757 L -292.4625 -198.66195 C -292.4625 -198.66195 -293.975 -197.97445 -294.6969 -199.07445 C -297.51564 -203.47445 -283.59376 -206.67132 -283.59376 -206.67132 Z" fill="#962c2c"/>
-        </g>
-        <g id="Graphic_11">
-          <path d="M -292.7375 -201.85882 C -292.7375 -201.85882 -294.9375 -201.10257 -294.525 -199.62445 C -294.1125 -198.11195 -292.3594 -199.04007 -292.3594 -199.04007 L -281.4969 -204.0932 C -281.4969 -204.0932 -282.11564 -205.70882 -281.01564 -206.77445 Z" fill="#d9e3e8"/>
-        </g>
-        <g id="Graphic_12">
-          <path d="M -290.91564 -217.0182 L -280.5 -206.87757 L -292.80626 -202.06507 L -300.7125 -214.37132 Z" fill="#ed4c5c"/>
-        </g>
-        <g id="Graphic_13">
-          <path d="M -290.60626 -214.71507 L -288.6125 -212.58382 L -296.0719 -209.90257 L -297.825 -212.6182 Z" fill="white"/>
-        </g>
-        <g id="Graphic_14">
-          <path d="M -281.53126 -205.67445 L -288.7844 -202.7182 L -281.6344 -205.98382 Z M -281.6344 -204.7807 L -289.36876 -201.58382 L -281.7719 -205.12445 Z M -281.56564 -204.29945 L -291.43126 -200.03695 L -281.70314 -204.60882 Z" fill="#94989b"/>
-        </g>
-        <g id="Graphic_15">
-          <path d="M -294.6969 -199.07445 C -295.9 -201.58382 -292.80626 -202.0307 -292.80626 -202.0307 L -300.7125 -214.37132 C -300.7125 -214.37132 -302.5 -214.4057 -302.5 -212.54945 C -302.5 -211.7932 -302.15626 -211.20882 -302.15626 -211.20882 Z" fill="#c94747"/>
-        </g>
-      </g>
-    </g>
-  </g>
-</svg>
-
-		
-		
-    Summary</a>
-
-    </li>
-    
-
-    
-    
-    
+    <% for(var k=0; k < locals.tabData[0].length; k++) { %>
+      <% var tabDataItem = locals.tabData[0][k] || {}; %>
+      <% var dbTabIndex = tabDataItem.tabindex || k; %>
+			
+      <% var mainDataItem = locals.mainFullData[dbTabIndex] || {}; %>
+      <li class="<%= tabDataItem.enable ? 'enabled' : 'hidediv' %>"><a data-toggle="tab" href="#<%=mainDataItem.tabname %>"><%- mainDataItem.icon %> <%=tabDataItem.label%></a></li>
+      
+    <% } %>
 
 	</ul>
 
 </div>
 
 		<div class="col-sm-1">
-&nbsp;
+
+
+<h6 style="float: right;">
+            
+              <a href="javaScript:void(0);" id="edit_tab_clicks" title="Edit tab" alt="Edit tab">
+			  <svg class="feather feather-edit" fill="none" height="20" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 28 21" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+			  
+			  
+  </a>
+</h6>
+
+
+
 </div>
 </div>
 
 	  <div class="tab-content">
 
 
-    <div id="introduction" class="tab-pane fade in active">
-		
-		
-	
-	
-	<div class="h_iframe">
-        <iframe  src="//<%=locals.baseurl %>/<%=locals.boardId %>_introduction" class="iframe fop" frameborder="0"></iframe>
-    </div>
-	
-	
-	
-	
-	  
-	  
-	  
-    </div>
-    <div id="keypoints" class="tab-pane fade">
-      
-      <div class="h_iframe">
-        <iframe  src="//<%=locals.baseurl %>/<%=locals.boardId %>_keypoints" class="iframe fop" frameborder="0"></iframe>
-      </div>
-    
 
+      <% for(var k=0; k < locals.tabData[0].length; k++) { %>
+        <% var tabDataItem = locals.tabData[0][k] || {}; %>
+		<% var dbTabIndex = tabDataItem.tabindex || k; %>
+        <% var mainDataItem = locals.mainFullData[dbTabIndex] || {}; %>
 
-    </div>
-    <div id="paragraph" class="tab-pane fade">
-      <div class="h_iframe">
-        <iframe  src="//<%=locals.baseurl %>/<%=locals.boardId %>_paragraph" class="iframe fop" frameborder="0"></iframe>
-      </div>
-    
-    </div>
-	
-	<div id="summary" class="tab-pane fade">
-      <div class="h_iframe">
-        <iframe  src="//<%=locals.baseurl %>/<%=locals.boardId %>_summary" class="iframe fop" frameborder="0"></iframe>
-      </div>
-    
-    </div>
-    
+        <div id="<%=mainDataItem.tabname %>" class="tab-pane fade <%= tabDataItem.enable ? 'enabled' : 'hidediv' %>">
+			<% if (tabDataItem.enable) { %> 		
+          <div class="h_iframe">
+            <iframe  src="//<%=locals.baseurl %>/<%=locals.boardId %>_<%=mainDataItem.tabname %>" class="iframe fop" frameborder="0"></iframe>
+          </div>
+		   <% } %>
+        </div>
+      <% } %>  
+
   </div>
 	
 	
@@ -367,6 +309,8 @@ function copyToClipboard(elementId) {
 </div>
 </div>
 </div>
+
+
 
 <div id="myShareModal" class="modal fade" role="dialog">
   <div class="modal-dialog">
@@ -382,7 +326,7 @@ function copyToClipboard(elementId) {
   <g id="Share_modal" stroke-dasharray="none" fill="none" stroke="none" fill-opacity="1" stroke-opacity="1">
     <title>Share modal</title>
     <g id="Share_modal_Layer_1">
-      <title>Layer 1</title>
+      <title></title>
       <g id="Graphic_133">
         <title>Share </title>
         <path d="M -293 -217.5 L -300.77273 -214.04545 L -300.77273 -208.86364 C -300.77273 -204.07045 -297.45636 -199.58818 -293 -198.5 C -288.54364 -199.58818 -285.22727 -204.07045 -285.22727 -208.86364 L -285.22727 -214.04545 L -293 -217.5 Z M -294.72727 -203.68182 L -298.18182 -207.13636 L -296.9641 -208.3541 L -294.72727 -206.1259 L -289.0359 -211.81727 L -287.81818 -210.5909 L -294.72727 -203.68182 Z" fill="black"/>
@@ -429,3 +373,84 @@ function copyToClipboard(elementId) {
 
   </div>
 </div>
+
+<!-- Edit Tab -->
+<div id="myEditTabModal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">
+<svg xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns="http://www.w3.org/2000/svg" xmlns:xl="http://www.w3.org/1999/xlink" version="1.1" viewBox="-308 -223 30 30" width="30" height="30"><defs/><g id="Planner" fill-opacity="1" stroke="none" stroke-opacity="1" fill="none" stroke-dasharray="none"><g id="Planner_Layer_1"><g id="Graphic_9"><title>Planner</title><path d="M -300.6 -213.7 L -302.5 -213.7 L -302.5 -200.4 C -302.5 -199.355 -301.645 -198.5 -300.6 -198.5 L -287.3 -198.5 L -287.3 -200.4 L -300.6 -200.4 L -300.6 -213.7 Z M -285.4 -217.5 L -296.8 -217.5 C -297.845 -217.5 -298.7 -216.645 -298.7 -215.6 L -298.7 -204.2 C -298.7 -203.155 -297.845 -202.3 -296.8 -202.3 L -285.4 -202.3 C -284.355 -202.3 -283.5 -203.155 -283.5 -204.2 L -283.5 -215.6 C -283.5 -216.645 -284.355 -217.5 -285.4 -217.5 Z M -286.35 -208.95 L -295.85 -208.95 L -295.85 -210.85 L -286.35 -210.85 L -286.35 -208.95 Z M -290.15 -205.15 L -295.85 -205.15 L -295.85 -207.05 L -290.15 -207.05 L -290.15 -205.15 Z M -286.35 -212.75 L -295.85 -212.75 L -295.85 -214.65 L -286.35 -214.65 L -286.35 -212.75 Z" fill="black"/></g></g></g></svg>
+
+	<span style="top: 16px; position: absolute; left: 50px;"> Planner </span></h4>
+      </div>
+      <div class="modal-body">
+        
+
+        <div class="container-fluid">
+			<table class="table">
+			  <thead>
+				<tr>
+				  <th scope="col" class="text-center">Include</th>
+				  <th scope="col">Reorder</th>
+				  <th scope="col">Tab</th>
+				  <th scope="col">Icon</th>
+				  <th scope="col">&nbsp;</th>
+				  <th scope="col">&nbsp;</th>
+				  
+				</tr>
+			  </thead>
+			  <tbody>
+				  <% for(var i=0; i < 6; i++) { %>					
+				  <% if (locals.tabData && locals.tabData.length > 0) { %>
+					<% var tabDataItem = locals.tabData[0][i] || {}; %>
+				  <% } else{ %>
+					<% var tabDataItem = {}; %>
+				  <% } %>
+				  <% var dbTabIndex = tabDataItem.tabindex || i; %>
+				  <% var mainDataItem = locals.mainFullData[dbTabIndex] || {}; %>
+				<tr id="row_<%= i %>">
+				  <th scope="row" class="text-center"><input type="checkbox" id="enable_<%= i %>" class="chkbox_select" <%= tabDataItem.enable ? 'checked' : '' %>></th>
+				  <td>
+					<a href="javascript:void(0);" class="arrow arrow_up" data-index="<%= i %>">
+					  <svg fill="#000000" height="20px" width="18px" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="-8 0 20 15" xml:space="preserve">
+						<g><path d="M12.703,4.285l-4-3.992c-0.391-0.39-1.022-0.39-1.413,0l-4,3.992l1.413,1.416l2.294-2.289v12.581h2V3.412l2.293,2.289L12.703,4.285z"/></g>
+					  </svg>
+					</a>
+					<a href="javascript:void(0);" class="arrow arrow_down" data-index="<%= i %>">
+					  <svg fill="#000000" width="20px" height="20px" viewBox="5 0 24 23" id="down-arrow" data-name="Flat Color" xmlns="http://www.w3.org/2000/svg" class="icon flat-color">
+						<path id="primary" d="M15.71,17.29a1,1,0,0,0-1.42,0L13,18.59V3a1,1,0,0,0-2,0V18.59l-1.29-1.3a1,1,0,0,0-1.42,1.42l3,3a1,1,0,0,0,1.42,0l3-3A1,1,0,0,0,15.71,17.29Z" style="fill: rgb(0, 0, 0);"></path>
+					  </svg>
+					</a>
+				  </td>
+				  <td><input type="hidden" id="tabindex_<%= i %>" class="clsTabIndex" value="<%= tabDataItem.tabindex || i %>"><input type="text" id="label_<%= i %>" class="clsLable form-control" placeholder="Tab name" value="<%= tabDataItem.label || '' %>" autocomplete="off" ></td>
+				  <td><%- mainDataItem.icon %></td>
+				  <td>&nbsp;</td>
+				  <td>&nbsp;</td>
+				</tr>
+				<% } %>
+			  </tbody>
+			</table>
+		
+          <div class="row">
+              <div class="col-md-12">&nbsp;</div>
+          </div>
+      
+         
+        </div>
+
+
+
+
+      </div>
+      <div class="modal-footer">
+        
+      </div>
+    </div>
+
+  </div>
+</div>
+<!-- End Edit tab -->

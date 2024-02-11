@@ -353,22 +353,69 @@ router.get('/pinboard/:id', function(req, res){
 	});
 });
 
-router.get('/planner/:id/:sectionname', function(req, res){
-	var url = req.header('host') + req.baseUrl;
-	//console.log('req.params.username = ' , req.params.name);
-	//console.log('req.params.username = ' , req.query.name);
-	res.cookie('scrumscrum-username',req.query.name);	
+router.get('/planner/:id/:sectionname', async function (req, res) {
 	
-	var fullUrl = req.protocol + '://' + req.get('host') + req.path;
-	db.getSectionName( req.params.id, function(size) {
+	try {
+		var url = req.header('host') + req.baseUrl;
+        res.cookie(`scrumscrum-username`, req.query.name, 365);
+        var fullUrl = req.protocol + '://' + req.get('host') + req.path;
+		// Use async/await to fetch data
+        const size = await new Promise((resolve, reject) => {
+            db.getSectionName(req.params.id, function (result) {
+                resolve(result);
+            });
+        });
+		var getPadID = req.params.id+'_planner_tab';
+        var dbTabData = await new Promise((resolve, reject) => {
+            db.getTabData(getPadID, function (result) {
+                resolve(result);
+            });
+        });
+		if (!dbTabData || dbTabData.length === 0) {
+			// Assign default value only if dbTabData is empty or undefined
+			const defaultTabData = [
+				[
+					{ enable: true, label: 'Introduction', icon :'',tabindex:0 },
+					{ enable: true, label: 'Key points', icon :'',tabindex:1 },
+					{ enable: true, label: 'Paragraph', icon :'',tabindex:2 },
+					{ enable: true, label: 'Summary', icon :'',tabindex:3 },
+					{ enable: false, label: 'Findings', icon :'',tabindex:4 },
+					{ enable: false, label: 'Methodology',icon :'',tabindex:5 }
+				]
+			];
+			// Update dbTabData with the default value
+			dbTabData = defaultTabData;
+		}
+		
+		var mainDefaultArr =[
+			{ tabname: 'introduction', 'active' : false , icon: `<svg xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns="http://www.w3.org/2000/svg" xmlns:xl="http://www.w3.org/1999/xlink" version="1.1" viewBox="-12 -11 22 20" width="28" height="20"><defs/><g id="Planner-red" fill-opacity="1" stroke="none" stroke-opacity="1" fill="none" stroke-dasharray="none"><title></title><g id="Planner-red_Layer_1"><title></title><g id="Group_7"><g id="Graphic_13"><path d="M 6.90625 -.153125 L 9.484375 2.390625 L -1.9625 7.85625 C -1.9625 7.85625 -3.475 8.54375 -4.196875 7.44375 C -7.015625 3.04375 6.90625 -.153125 6.90625 -.153125 Z" fill="#962c2c"/></g><g id="Graphic_12"><path d="M -2.2375 4.659375 C -2.2375 4.659375 -4.4375 5.415625 -4.025 6.89375 C -3.6125 8.40625 -1.859375 7.478125 -1.859375 7.478125 L 9.003125 2.425 C 9.003125 2.425 8.384375 .809375 9.484375 -.25625 Z" fill="#d9e3e8"/></g><g id="Graphic_11"><path d="M -.415625 -10.5 L 10 -.359375 L -2.30625 4.453125 L -10.2125 -7.853125 Z" fill="#ed4c5c"/></g><g id="Graphic_10"><path d="M -.10625 -8.196875 L 1.8875 -6.065625 L -5.571875 -3.384375 L -7.325 -6.1 Z" fill="white"/></g><g id="Graphic_9"><path d="M 8.96875 .84375 L 1.715625 3.8 L 8.865625 .534375 Z M 8.865625 1.7375 L 1.13125 4.934375 L 8.728125 1.39375 Z M 8.934375 2.21875 L -.93125 6.48125 L 8.796875 1.909375 Z" fill="#94989b"/></g><g id="Graphic_8"><path d="M -4.196875 7.44375 C -5.4 4.934375 -2.30625 4.4875 -2.30625 4.4875 L -10.2125 -7.853125 C -10.2125 -7.853125 -12 -7.8875 -12 -6.03125 C -12 -5.275 -11.65625 -4.690625 -11.65625 -4.690625 Z" fill="#c94747"/></g></g></g></g></svg>` },
+
+			{ tabname: 'keypoints','active' : false , icon: `<svg xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns="http://www.w3.org/2000/svg" xmlns:xl="http://www.w3.org/1999/xlink" version="1.1" viewBox="-8 9 23 19" width="28" height="19"><defs/><g id="Planner-green" fill-opacity="1" stroke="none" stroke-opacity="1" fill="none" stroke-dasharray="none"><title></title><g id="Planner-green_Layer_1"><title></title><g id="Group_15"><g id="Graphic_21"><path d="M 10.90625 19.346875 L 13.484375 21.890625 L 2.0375 27.35625 C 2.0375 27.35625 .525 28.04375 -.196875 26.94375 C -3.015625 22.54375 10.90625 19.346875 10.90625 19.346875 Z" fill="#228b22"/></g><g id="Graphic_20"><path d="M 1.7625 24.159375 C 1.7625 24.159375 -.4375 24.915625 -.025 26.39375 C .3875 27.90625 2.140625 26.978125 2.140625 26.978125 L 13.003125 21.925 C 13.003125 21.925 12.384375 20.309375 13.484375 19.24375 Z" fill="#d9e3e8"/></g><g id="Graphic_19"><path d="M 3.584375 9 L 14 19.140625 L 1.69375 23.953125 L -6.2125 11.646875 Z" fill="#46b850"/></g><g id="Graphic_18"><path d="M 3.89375 11.303125 L 5.8875 13.434375 L -1.571875 16.115625 L -3.325 13.4 Z" fill="white"/></g><g id="Graphic_17"><path d="M 12.96875 20.34375 L 5.715625 23.3 L 12.865625 20.034375 Z M 12.865625 21.2375 L 5.13125 24.434375 L 12.728125 20.89375 Z M 12.934375 21.71875 L 3.06875 25.98125 L 12.796875 21.409375 Z" fill="#94989b"/></g><g id="Graphic_16"><path d="M -.196875 26.94375 C -1.4 24.434375 1.69375 23.9875 1.69375 23.9875 L -6.2125 11.646875 C -6.2125 11.646875 -8 11.6125 -8 13.46875 C -8 14.225 -7.65625 14.809375 -7.65625 14.809375 Z" fill="#228b22"/></g></g></g></g></svg>`},
+			
+			{ tabname: 'paragraph','active' : true, icon: `<svg xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns="http://www.w3.org/2000/svg" xmlns:xl="http://www.w3.org/1999/xlink" version="1.1" viewBox="-14 -2 23 19" width="28" height="19"><defs/><g id="Planner-blue" fill-opacity="1" stroke="none" stroke-opacity="1" fill="none" stroke-dasharray="none"><title></title><g id="Planner-blue_Layer_1"><title></title><g id="Group_9"><g id="Graphic_15"><path d="M 5.40625 8.346875 L 7.984375 10.890625 L -3.4625 16.35625 C -3.4625 16.35625 -4.975 17.04375 -5.696875 15.94375 C -8.515625 11.54375 5.40625 8.346875 5.40625 8.346875 Z" fill="#2a8fd8" fill-opacity=".97"/></g><g id="Graphic_14"><path d="M -3.7375 13.159375 C -3.7375 13.159375 -5.9375 13.915625 -5.525 15.39375 C -5.1125 16.90625 -3.359375 15.978125 -3.359375 15.978125 L 7.503125 10.925 C 7.503125 10.925 6.884375 9.309375 7.984375 8.24375 Z" fill="#d9e3e8"/></g><g id="Graphic_13"><path d="M -1.915625 -2 L 8.5 8.140625 L -3.80625 12.953125 L -11.7125 .646875 Z" fill="#55bfff"/></g><g id="Graphic_12"><path d="M -1.60625 .303125 L .3875 2.434375 L -7.071875 5.115625 L -8.825 2.4 Z" fill="white"/></g><g id="Graphic_11"><path d="M 7.46875 9.34375 L .215625 12.3 L 7.365625 9.034375 Z M 7.365625 10.2375 L -.36875 13.434375 L 7.228125 9.89375 Z M 7.434375 10.71875 L -2.43125 14.98125 L 7.296875 10.409375 Z" fill="#94989b"/></g><g id="Graphic_10"><path d="M -5.696875 15.94375 C -6.9 13.434375 -3.80625 12.9875 -3.80625 12.9875 L -11.7125 .646875 C -11.7125 .646875 -13.5 .6125 -13.5 2.46875 C -13.5 3.225 -13.15625 3.809375 -13.15625 3.809375 Z" fill="#47a2f1"/></g></g></g></g></svg>` },
+			
+			{ tabname: 'summary','active' : true, icon: `<svg xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns="http://www.w3.org/2000/svg" xmlns:xl="http://www.w3.org/1999/xlink" version="1.1" viewBox="-35 -1 23 19" width="28" height="19"><defs/><g id="Planner-orange" fill-opacity="1" stroke="none" stroke-opacity="1" fill="none" stroke-dasharray="none"><title></title><g id="Planner-orange_Layer_1"><title></title><g id="Group_10"><g id="Graphic_16"><path d="M -15.59375 9.346875 L -13.015625 11.890625 L -24.4625 17.35625 C -24.4625 17.35625 -25.975 18.04375 -26.696875 16.94375 C -29.515625 12.54375 -15.59375 9.346875 -15.59375 9.346875 Z" fill="#e76d23"/></g><g id="Graphic_15"><path d="M -24.7375 14.159375 C -24.7375 14.159375 -26.9375 14.915625 -26.525 16.39375 C -26.1125 17.90625 -24.359375 16.978125 -24.359375 16.978125 L -13.496875 11.925 C -13.496875 11.925 -14.115625 10.309375 -13.015625 9.24375 Z" fill="#d9e3e8"/></g><g id="Graphic_14"><path d="M -22.915625 -1 L -12.5 9.140625 L -24.80625 13.953125 L -32.7125 1.646875 Z" fill="#ffa500"/></g><g id="Graphic_13"><path d="M -22.60625 1.303125 L -20.6125 3.434375 L -28.071875 6.115625 L -29.825 3.4 Z" fill="white"/></g><g id="Graphic_12"><path d="M -13.53125 10.34375 L -20.784375 13.3 L -13.634375 10.034375 Z M -13.634375 11.2375 L -21.36875 14.434375 L -13.771875 10.89375 Z M -13.565625 11.71875 L -23.43125 15.98125 L -13.703125 11.409375 Z" fill="#94989b"/></g><g id="Graphic_11"><path d="M -26.696875 16.600044 C -27.9 14.090669 -24.80625 13.643794 -24.80625 13.643794 L -32.7125 1.3031688 C -32.7125 1.3031688 -34.5 1.2687938 -34.5 3.125044 C -34.5 3.881294 -34.15625 4.465669 -34.15625 4.465669 Z" fill="#e76d23"/></g></g></g></g></svg>` },
+			
+			{ tabname: 'findings','active' : true, icon: `<svg xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns="http://www.w3.org/2000/svg" xmlns:xl="http://www.w3.org/1999/xlink" version="1.1" viewBox="-57 24 22 19" width="28" height="19"><defs/><g id="Planner-purple" fill-opacity="1" stroke="none" stroke-opacity="1" fill="none" stroke-dasharray="none"><title></title><g id="Planner-purple_Layer_1"><title></title><g id="Group_11"><g id="Graphic_17"><path d="M -38.09375 34.346875 L -35.515625 36.890625 L -46.9625 42.35625 C -46.9625 42.35625 -48.475 43.04375 -49.196875 41.94375 C -52.015625 37.54375 -38.09375 34.346875 -38.09375 34.346875 Z" fill="#6730ec"/></g><g id="Graphic_16"><path d="M -47.2375 39.159375 C -47.2375 39.159375 -49.4375 39.915625 -49.025 41.39375 C -48.6125 42.90625 -46.859375 41.978125 -46.859375 41.978125 L -35.996875 36.925 C -35.996875 36.925 -36.615625 35.309375 -35.515625 34.24375 Z" fill="#d9e3e8"/></g><g id="Graphic_15"><path d="M -45.415625 24 L -35 34.140625 L -47.30625 38.953125 L -55.2125 26.646875 Z" fill="#9370db"/></g><g id="Graphic_14"><path d="M -45.10625 26.303125 L -43.1125 28.434375 L -50.571875 31.115625 L -52.325 28.4 Z" fill="white"/></g><g id="Graphic_13"><path d="M -36.03125 35.34375 L -43.284375 38.3 L -36.134375 35.034375 Z M -36.134375 36.2375 L -43.86875 39.434375 L -36.271875 35.89375 Z M -36.065625 36.71875 L -45.93125 40.98125 L -36.203125 36.409375 Z" fill="#94989b"/></g><g id="Graphic_12"><path d="M -49.196875 41.94375 C -50.4 39.434375 -47.30625 38.9875 -47.30625 38.9875 L -55.2125 26.646875 C -55.2125 26.646875 -57 26.6125 -57 28.46875 C -57 29.225 -56.65625 29.809375 -56.65625 29.809375 Z" fill="#9370db"/></g></g></g></g></svg>` },
+			
+			{ tabname: 'methodology','active' : true, icon: `<svg xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns="http://www.w3.org/2000/svg" xmlns:xl="http://www.w3.org/1999/xlink" version="1.1" viewBox="-15 -3 22 19" width="28" height="19"><defs/><g id="Planner-black" fill-opacity="1" stroke="none" stroke-opacity="1" fill="none" stroke-dasharray="none"><title></title><g id="Planner-black_Layer_1"><title></title><g id="Group_12"><g id="Graphic_18"><path d="M 3.90625 7.346875 L 6.484375 9.890625 L -4.9625 15.35625 C -4.9625 15.35625 -6.475 16.04375 -7.196875 14.94375 C -10.015625 10.54375 3.90625 7.346875 3.90625 7.346875 Z" fill="black"/></g><g id="Graphic_17"><path d="M -5.2375 12.159375 C -5.2375 12.159375 -7.4375 12.915625 -7.025 14.39375 C -6.6125 15.90625 -4.859375 14.978125 -4.859375 14.978125 L 6.003125 9.925 C 6.003125 9.925 5.384375 8.309375 6.484375 7.24375 Z" fill="#d9e3e8"/></g><g id="Graphic_16"><path d="M -3.415625 -3 L 7 7.140625 L -5.30625 11.953125 L -13.2125 -.353125 Z" fill="#333"/></g><g id="Graphic_15"><path d="M -3.10625 -.696875 L -1.1125 1.434375 L -8.571875 4.115625 L -10.325 1.4 Z" fill="white"/></g><g id="Graphic_14"><path d="M 5.96875 8.34375 L -1.284375 11.3 L 5.865625 8.034375 Z M 5.865625 9.2375 L -1.86875 12.434375 L 5.728125 8.89375 Z M 5.934375 9.71875 L -3.93125 13.98125 L 5.796875 9.409375 Z" fill="#94989b"/></g><g id="Graphic_13"><path d="M -7.196875 14.94375 C -8.4 12.434375 -5.30625 11.9875 -5.30625 11.9875 L -13.2125 -.353125 C -13.2125 -.353125 -15 -.3875 -15 1.46875 C -15 2.225 -14.65625 2.809375 -14.65625 2.809375 Z" fill="#333"/></g></g></g></g></svg>` },
+		]
+		
 		res.render('planner', {
-			pageTitle: ('Planner - ' + size),
-			boardId: req.params.id,
-			sectionname: size,
-			baseurl:url,
-			fullUrl:fullUrl
-		});
-	});
+            pageTitle: ('planner - ' + size),
+            boardId: req.params.id,
+            sectionname: size,
+            baseurl: url,
+            fullUrl: fullUrl,
+            tabData: dbTabData,
+			mainFullData: mainDefaultArr
+        });
+		
+	} catch (error) {
+        // Handle errors
+        console.error(error);
+        res.status(500).send('Internal Server Error');
+    }
 });
 
 
